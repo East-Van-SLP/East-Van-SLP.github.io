@@ -23,19 +23,34 @@ Line 390 decodes to a Claude Design canvas document (`<x-dc>` root) with a
 `<script type="text/x-dc">` block defining `class Component extends DCLogic`. That class holds
 **all copy and all behaviour**. Everything you'd normally call "the site" lives there.
 
-### Editing it
+### Updating it from a new export
 
-Do not hand-edit line 378 or 390 in place. Decode → edit → re-encode:
+Changes are authored in the Claude Design canvas and exported as a fresh bundle into
+`East Van SLP -  HTML Source/` (gitignored). **The canvas does not carry the fixes below**, so a
+raw export always regresses them. Never copy an export straight over `index.html`. Run:
 
 ```bash
-python3 -c "import json; open('site.html','w').write(json.loads(open('line390.txt').read().strip()))"
+node .claude/apply-export.mjs "East Van SLP -  HTML Source/<new export>.html"
 ```
 
-…where `line390.txt` is `sed -n '390p' index.html`. Re-encode with `json.dumps` and splice back
-with `sed`. Line 378 (assets) should stay byte-identical unless you're adding an image.
+That decodes line 390, applies every fix, re-encodes, and writes `index.html`. It is idempotent —
+running it twice changes nothing — and it reports which fixes it applied versus found already
+present. If a fix stops matching it throws rather than silently writing a broken file.
 
-For anything larger than a copy tweak, prefer re-exporting from the Claude Design canvas that
-produced this bundle rather than patching the encoded string.
+Fixes it re-applies: `<html lang="en">` · favicon (data lives in `.claude/favicon.svg.b64`,
+because `.gitignore` excludes `*.svg`) · description / canonical / theme-color / Open Graph /
+Twitter meta · the per-group stagger from `1f71545`.
+
+To add a fix, add another `fix()` call. To hand-edit instead, decode with:
+
+```bash
+sed -n '390p' index.html > line390.txt
+```
+
+then `JSON.parse` it. Re-encode with `JSON.stringify(doc).replace(/<\//g, '<\\u002F')` — the
+`</` escaping is load-bearing, since the payload sits inside
+`<script type="__bundler/template">` and an unescaped `</script>` would end the tag early. Line
+378 (assets) should stay byte-identical unless you're adding an image.
 
 ## Site structure
 
@@ -43,8 +58,9 @@ Client-side routing via `state.page` — no URLs per page, no anchors. Five page
 `home`, `services`, `about`, `faq`, `contact`.
 
 Content arrays inside `renderVals()`:
-- `serviceData` — 9 services (speech sounds, language, fluency, AAC/autism, parent coaching,
-  assessments, voice, feeding, daycare visits). Accordion, one open at a time.
+- `serviceData` — 7 services (speech sounds, language, fluency, AAC/autism, parent coaching,
+  assessments, daycare visits). Accordion, one open at a time. Voice therapy and feeding &
+  swallowing were removed in V2.
 - `faqData` — 6 Q&As. Same accordion pattern.
 - `quotes`, `places`, `logistics`, `creds`, `steps`, `marks`, `trust`, `include`.
 
@@ -52,10 +68,12 @@ Editor-facing props (in `data-props`): `acceptingClients`, `showTestimonials`, `
 
 `setupReveal()` drives scroll-in animation via IntersectionObserver. The stagger delay is
 computed **per sibling group** (`gi` = index among siblings with `[data-reveal]`), not per
-document — that was the fix in `1f71545`, and it's easy to regress if you touch that function.
+document — that was the fix in `1f71545`. The canvas still has the old per-document version, so
+every export regresses it; `apply-export.mjs` puts it back.
 
 ### Business facts baked into the copy
-Practising since 2001 · RASP registered, direct bills to Autism Funding · in-home within 10 km of
+Practising since 2001 · RASP registered, direct bills to Disability Benefit Funding (renamed from
+Autism Funding in V2) · in-home within 10 km of
 Hastings-Sunrise · daycare/school visits · office near the PNE · Zoom · Mon–Fri 9:00–3:30, a few
 online slots after 4:00 pm · reports $80/hr · meaghan@eastvanslp.ca · 778-230-3899.
 
@@ -75,10 +93,17 @@ from Windows.
 
 ## Repo hygiene
 
-Only `.gitignore` and `index.html` are tracked. `.gitignore` excludes `*.jpg *.jpeg *.png *.svg
-*.zip *.docx`, so the loose source photos and `drive-download-*/` stay local — the site doesn't
-need them, the assets are already inlined in line 378.
+Tracked: `.gitignore`, `index.html`, `CLAUDE.md`, `LICENSE`, `.claude/`. Everything else is
+ignored — source photos, `.DS_Store`, and the raw exports in `East Van SLP -  HTML Source/`
+(multi-MB base64 that git cannot delta-compress; each version is already captured as an
+`index.html` commit).
 
-`Meaghan McLeod - East Van SLP (website).html` is the **original untouched export**. `index.html`
-is that file plus a favicon `<link>` and the stagger fix. It is stale; keep it only as a
-reference copy, and never deploy it.
+## Known gaps
+
+- **No `og:image`.** Link previews on Messenger and Facebook show title and description but no
+  picture. Adding one means committing an image file and referencing it by absolute URL — the
+  bundle's inlined assets are not reachable as URLs. Every candidate photo in this repo shows a
+  client's child, so the image needs Meaghan's explicit consent before it goes in a social card.
+- **`homeServiceCount` is 6** while there are now 7 services, so the home page hides exactly one.
+  That was a sensible teaser at 9 services; at 7 it looks arbitrary. It is a canvas prop, not a
+  defect — change it in the canvas, not here.

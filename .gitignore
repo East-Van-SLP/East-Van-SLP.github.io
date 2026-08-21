@@ -1,6 +1,16 @@
+# Source photos and documents — the site inlines its own assets, so these
+# are working files only.
 *.jpg
 *.jpeg
 *.png
 *.svg
 *.zip
 *.docx
+
+# Raw Claude Design exports. index.html is the deployed export plus the fixes
+# in .claude/apply-export.mjs, so each version is already captured in git
+# history; these are multi-MB base64 blobs that git cannot delta-compress.
+East Van SLP -  HTML Source/
+
+# macOS
+.DS_Store
