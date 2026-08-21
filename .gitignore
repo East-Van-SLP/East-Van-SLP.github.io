@@ -14,3 +14,6 @@ East Van SLP -  HTML Source/
 
 # macOS
 .DS_Store
+
+# ...except the Open Graph card, which Pages must serve as a real file.
+!og-image.jpg

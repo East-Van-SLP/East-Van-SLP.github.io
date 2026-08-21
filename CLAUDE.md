@@ -39,7 +39,17 @@ present. If a fix stops matching it throws rather than silently writing a broken
 
 Fixes it re-applies: `<html lang="en">` · favicon (data lives in `.claude/favicon.svg.b64`,
 because `.gitignore` excludes `*.svg`) · description / canonical / theme-color / Open Graph /
-Twitter meta · the per-group stagger from `1f71545`.
+Twitter meta, including `og:image` · the per-group stagger from `1f71545`.
+
+`og-image.jpg` (1200x630) is the social card, built from Meaghan's headshot by
+`.claude/build-og-image.py` (needs Pillow; fonts fall back to Georgia, the site's own declared
+serif fallback). It has to be a real file at the Pages root because `og:image` needs an absolute
+URL and the bundle's inlined assets are not reachable as URLs — hence the `!og-image.jpg`
+exception in `.gitignore`. Rebuild it only if the headshot or the wording changes:
+
+```bash
+python3 .claude/build-og-image.py MMcLeod.jpg og-image.jpg
+```
 
 To add a fix, add another `fix()` call. To hand-edit instead, decode with:
 
@@ -100,10 +110,6 @@ ignored — source photos, `.DS_Store`, and the raw exports in `East Van SLP -  
 
 ## Known gaps
 
-- **No `og:image`.** Link previews on Messenger and Facebook show title and description but no
-  picture. Adding one means committing an image file and referencing it by absolute URL — the
-  bundle's inlined assets are not reachable as URLs. Every candidate photo in this repo shows a
-  client's child, so the image needs Meaghan's explicit consent before it goes in a social card.
-- **`homeServiceCount` is 6** while there are now 7 services, so the home page hides exactly one.
-  That was a sensible teaser at 9 services; at 7 it looks arbitrary. It is a canvas prop, not a
-  defect — change it in the canvas, not here.
+- **Screenshot capture of scrolled positions** returned blank frames in one session while the DOM
+  confirmed content was rendered. If a screenshot looks empty, verify layout by measuring
+  elements rather than trusting the image.

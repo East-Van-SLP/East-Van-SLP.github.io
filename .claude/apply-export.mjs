@@ -23,6 +23,10 @@ const SITE = 'https://east-van-slp.github.io/';
 const DESC =
   'Play-based, family-centred speech-language therapy for children in East Vancouver ' +
   '— at home, at daycare or online. RASP registered, practising since 2001.';
+// Built by .claude/build-og-image.py from Meaghan's headshot. Must be an absolute
+// URL — the bundle's inlined assets are not reachable as URLs, so this is served
+// as its own file from the Pages root.
+const OG_IMAGE = `${SITE}og-image.jpg`;
 
 // The bundle inlines line 390 inside <script type="__bundler/template">, so every
 // "</" must stay escaped or the tag terminates early. Verified byte-for-byte
@@ -67,9 +71,14 @@ const META = [
   `<meta property="og:description" content="${DESC}">`,
   `<meta property="og:url" content="${SITE}">`,
   `<meta property="og:locale" content="en_CA">`,
-  `<meta name="twitter:card" content="summary">`,
+  `<meta property="og:image" content="${OG_IMAGE}">`,
+  `<meta property="og:image:width" content="1200">`,
+  `<meta property="og:image:height" content="630">`,
+  `<meta property="og:image:alt" content="Meaghan McLeod, registered speech-language pathologist, East Van SLP">`,
+  `<meta name="twitter:card" content="summary_large_image">`,
   `<meta name="twitter:title" content="Meaghan McLeod — East Van SLP">`,
   `<meta name="twitter:description" content="${DESC}">`,
+  `<meta name="twitter:image" content="${OG_IMAGE}">`,
 ].join('\n');
 fix('seo/social meta', (d) => d.includes('name="description"'),
     (d) => d.replace(/(<title>[^<]*<\/title>\n)/, `$1${META}\n`));
