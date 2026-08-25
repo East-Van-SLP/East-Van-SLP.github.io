@@ -71,10 +71,16 @@ Content arrays inside `renderVals()`:
 - `serviceData` — 7 services (speech sounds, language, fluency, AAC/autism, parent coaching,
   assessments, daycare visits). Accordion, one open at a time. Voice therapy and feeding &
   swallowing were removed in V2.
-- `faqData` — 6 Q&As. Same accordion pattern.
-- `quotes`, `places`, `logistics`, `creds`, `steps`, `marks`, `trust`, `include`.
+- `faqData` — 7 Q&As. Same accordion pattern. "What is your hourly rate?" was added in V4.
+- `quotes` — 3 testimonials (a third was added in V4).
+- `places`, `logistics`, `creds`, `steps`, `marks`, `trust`, `include`.
 
-Editor-facing props (in `data-props`): `acceptingClients`, `showTestimonials`, `homeServiceCount`.
+The About page carries a "Registration & memberships" block and the footer a College link, all
+`target="_blank" rel="noopener"`. The College URL ends in Meaghan's registrant UUID, which looks
+like a bundle asset id — do not let a find-and-replace over asset ids touch it.
+
+Editor-facing props (in `data-props`): `showTestimonials`, `homeServiceCount`. `acceptingClients`
+and the "Currently accepting new families" badge it gated were both removed in V4.
 
 `setupReveal()` drives scroll-in animation via IntersectionObserver. The stagger delay is
 computed **per sibling group** (`gi` = index among siblings with `[data-reveal]`), not per
@@ -85,7 +91,9 @@ every export regresses it; `apply-export.mjs` puts it back.
 Practising since 2001 · RASP registered, direct bills to Disability Benefit Funding (renamed from
 Autism Funding in V2) · in-home within 10 km of
 Hastings-Sunrise · daycare/school visits · office near the PNE · Zoom · Mon–Fri 9:00–3:30, a few
-online slots after 4:00 pm · reports $80/hr · meaghan@eastvanslp.ca · 778-230-3899.
+online slots after 4:00 pm · **$160/hr** for sessions (public since V4) · reports $80/hr ·
+licensed with the College of Health and Care Professionals of BC, member of Speech and Hearing BC
+and Speech-Language & Audiology Canada · meaghan@eastvanslp.ca · 778-230-3899.
 
 ## Local preview
 
@@ -110,6 +118,9 @@ ignored — source photos, `.DS_Store`, and the raw exports in `East Van SLP -  
 
 ## Known gaps
 
+- **Services page rate card wraps mid-phrase.** At the desktop width the caption breaks
+  "Disability Benefit / Funding available" across two lines, splitting the proper noun. Cosmetic,
+  and a canvas fix — patching it here would be lost on the next export.
 - **Screenshot capture of scrolled positions** returned blank frames in one session while the DOM
   confirmed content was rendered. If a screenshot looks empty, verify layout by measuring
   elements rather than trusting the image.
