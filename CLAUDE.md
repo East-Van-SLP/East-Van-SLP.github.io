@@ -118,9 +118,6 @@ ignored — source photos, `.DS_Store`, and the raw exports in `East Van SLP -  
 
 ## Known gaps
 
-- **Services page rate card wraps mid-phrase.** At the desktop width the caption breaks
-  "Disability Benefit / Funding available" across two lines, splitting the proper noun. Cosmetic,
-  and a canvas fix — patching it here would be lost on the next export.
 - **Screenshot capture of scrolled positions** returned blank frames in one session while the DOM
   confirmed content was rendered. If a screenshot looks empty, verify layout by measuring
   elements rather than trusting the image.
