@@ -11,6 +11,7 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   '.json': 'application/json', '.woff2': 'font/woff2', '.ico': 'image/x-icon',
+  '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml',
 };
 
 async function serveFile(file, res) {

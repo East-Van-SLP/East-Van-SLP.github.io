@@ -13,16 +13,21 @@
  * invisible to search engines and unlinkable to anyone. This script does not touch the canvas
  * or its export; it runs on the already-fixed index.html and rewires navigation to real
  * anchors, gives each page its own <title>/description/canonical, and keeps every other line
- * of markup, every style, every animation, and every image byte-for-byte untouched.
+ * of markup, every style, every animation, and every image byte-for-byte untouched. It also
+ * (re)writes sitemap.xml and robots.txt from the same PAGE_URL map every page is built from,
+ * so they can't drift out of sync with the actual page set the way a hand-maintained copy
+ * eventually would.
  *
  * Pipeline:
  *   node .claude/apply-export.mjs "East Van SLP -  HTML Source/<export>.html"   # -> full index.html
- *   node .claude/split-pages.mjs                                                # -> 5 pages
+ *   node .claude/split-pages.mjs                                                # -> 5 pages + sitemap/robots
  *
- * Idempotency: requires an UNSPLIT input containing all five
- * <sc-if value="{{ isX }}"> blocks. Running it against an already-split index.html (which
- * only contains the Home block) throws by design — re-run apply-export.mjs against the raw
- * canvas export first to regenerate the full document, then run this again.
+ * Idempotency: sitemap.xml/robots.txt regenerate unconditionally, every run — safe to run just
+ * to refresh those two even when index.html is already split. The actual PAGE split step
+ * requires an UNSPLIT input containing all five <sc-if value="{{ isX }}"> blocks, and throws
+ * by design if index.html is already split (the normal state once the site is live) — re-run
+ * apply-export.mjs against the raw canvas export first to regenerate the full document, then
+ * run this again.
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
@@ -63,6 +68,30 @@ const OUT_PATH = {
   contact: 'contact/index.html',
 };
 const SITE = 'https://eastvanslp.ca';
+
+// sitemap.xml / robots.txt describe the site's URL structure, which is just the fixed
+// PAGE_URL map above — they don't depend on decoding the bundle at all. Generate them
+// unconditionally, before the "is this an unsplit export?" guard below, so refreshing them
+// works even when index.html is already split (the normal state once the site is live) and
+// isn't blocked by that guard's intentional throw.
+const today = new Date().toISOString().slice(0, 10);
+const sitemap =
+  '<?xml version="1.0" encoding="UTF-8"?>\n' +
+  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+  PAGES.map(
+    (p) =>
+      '  <url>\n' +
+      `    <loc>${SITE}${PAGE_URL[p]}</loc>\n` +
+      `    <lastmod>${today}</lastmod>\n` +
+      '  </url>\n'
+  ).join('') +
+  '</urlset>\n';
+writeFileSync('sitemap.xml', sitemap);
+
+const robots = `User-agent: *\nAllow: /\n\nSitemap: ${SITE}/sitemap.xml\n`;
+writeFileSync('robots.txt', robots);
+
+console.log(`split-pages.mjs: wrote sitemap.xml (${PAGES.length} urls, lastmod ${today}) and robots.txt`);
 
 const META = {
   home: {
