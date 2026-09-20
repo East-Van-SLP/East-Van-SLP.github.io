@@ -361,6 +361,9 @@ for (const page of PAGES) {
   );
   outLines[manifestLineIdx] = JSON.stringify(trimmedManifest);
   outLines[templateLineIdx] = encode(outDoc);
+  // Do this splice LAST — it shifts every later index in outLines by one, which would
+  // corrupt the manifestLineIdx/templateLineIdx writes above if done before them.
+  outLines.splice(shellTitleLineIdx + 1, 0, '  <link rel="apple-touch-icon" href="/apple-touch-icon.png">');
   const outPath = OUT_PATH[page];
   const dir = outPath.includes('/') ? outPath.slice(0, outPath.lastIndexOf('/')) : null;
   if (dir) mkdirSync(dir, { recursive: true });

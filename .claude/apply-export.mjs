@@ -63,6 +63,16 @@ fix('favicon', (d) => d.includes('<link rel="icon"'),
     (d) => d.replace(/(<title>[^<]*<\/title>\n)/,
       `$1<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,${favicon}">\n`));
 
+// 2b. Apple touch icon — for "Add to Home Screen" on iOS. This MUST live here, in the
+// JS-rendered helmet, not in the static loader-shell <head>: the unpacker replaces the shell
+// head wholesale once the app mounts, so anything added only there is gone by the time a real
+// user (whose browser has long since finished running the JS) tries to add the page to their
+// home screen. apple-touch-icon.png is a real file at the Pages root (git-tracked despite the
+// *.png rule, same exception pattern as og-image.jpg) — built by
+// .claude/build-icons.py; see CLAUDE.md.
+fix('apple-touch-icon', (d) => d.includes('apple-touch-icon'),
+    (d) => d.replace('<link rel="icon"', '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n<link rel="icon"'));
+
 // 3. Search + social metadata. Meaghan shares the site over Messenger, which
 //    renders nothing without Open Graph tags.
 const META = [

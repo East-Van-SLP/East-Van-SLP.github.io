@@ -15,5 +15,6 @@ East Van SLP -  HTML Source/
 # macOS
 .DS_Store
 
-# ...except the Open Graph card, which Pages must serve as a real file.
+# ...except the Open Graph card and the Apple touch icon, which Pages must serve as real files.
 !og-image.jpg
+!apple-touch-icon.png
