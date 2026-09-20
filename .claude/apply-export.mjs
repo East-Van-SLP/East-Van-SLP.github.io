@@ -19,7 +19,11 @@ if (!input) {
   process.exit(1);
 }
 
-const SITE = 'https://east-van-slp.github.io/';
+// Custom domain, live since Meaghan pointed eastvanslp.ca at Pages. The apex is
+// canonical; www.eastvanslp.ca CNAMEs to east-van-slp.github.io and GitHub
+// redirects it here. east-van-slp.github.io also redirects here now that CNAME
+// is committed, so it must not be used in canonical/og URLs.
+const SITE = 'https://eastvanslp.ca/';
 const DESC =
   'Play-based, family-centred speech-language therapy for children in East Vancouver ' +
   '— at home, at daycare or online. RASP registered, practising since 2001.';
