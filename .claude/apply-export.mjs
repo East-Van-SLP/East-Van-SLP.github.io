@@ -107,6 +107,11 @@ const STAGGER_NEW =
 fix('per-group stagger', (d) => d.includes('sibs.indexOf(el)'),
     (d) => d.replace(STAGGER_OLD, STAGGER_NEW));
 
+// NOTE: the hamburger menu (mobile/tablet nav) lives in split-pages.mjs, not here — it needs
+// {{ item.href }} and the string-valued goServices/goAbout/etc., which split-pages.mjs is what
+// creates from the canvas's original onClick-based nav. This file runs BEFORE that conversion,
+// so the raw export never has those markers to hook into. See split-pages.mjs.
+
 lines[idx] = encode(doc);
 writeFileSync(output, lines.join('\n'));
 

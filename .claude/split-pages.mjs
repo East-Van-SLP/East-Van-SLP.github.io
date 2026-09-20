@@ -271,6 +271,89 @@ homeBlock = replaceOnce(
   'about teaser CTA'
 );
 
+// (e) Hamburger menu for mobile/tablet. The header nav is a plain flex row with no wrap
+// handling — below ~920px (covers iPhone 12 Pro at 390px through iPad Air at 820-834px, both
+// reported broken) the logo, 5 links and the "Email Meaghan" button don't fit, so the row
+// wraps mid-nav and "Contact" strands itself on a third line. Collapses the nav + email CTA
+// behind a toggle button at that same breakpoint instead, reusing the state/renderVals/sc-if
+// machinery the accordions already use rather than a CSS-only checkbox hack. Must run here,
+// after the button->anchor conversion above: it needs {{ item.href }} and the string-valued
+// goServices/goAbout/etc. that conversion creates, which don't exist yet when
+// apply-export.mjs runs on the raw canvas export.
+baseSuffix = replaceOnce(
+  baseSuffix,
+  "state = { page: 'home', openService: 0, openFaq: -1 };",
+  "state = { page: 'home', openService: 0, openFaq: -1, menuOpen: false };",
+  'hamburger: state declaration'
+);
+baseSuffix = replaceOnce(
+  baseSuffix,
+  "go(page) {\n    this.setState({ page: page });\n    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'auto' });\n  }",
+  "go(page) {\n    this.setState({ page: page });\n    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'auto' });\n  }\n\n  toggleMenu() {\n    this.setState({ menuOpen: !this.state.menuOpen });\n  }",
+  'hamburger: toggleMenu method'
+);
+baseSuffix = replaceOnce(
+  baseSuffix,
+  'nav: pages.map((p) => ({ label: p[1], active: page === p[0], href: PAGE_URL[p[0]] })),',
+  'nav: pages.map((p) => ({ label: p[1], active: page === p[0], href: PAGE_URL[p[0]] })),\n      menuOpen: this.state.menuOpen,\n      menuClosed: !this.state.menuOpen,\n      toggleMenu: () => this.toggleMenu(),',
+  'hamburger: renderVals exposure'
+);
+basePrefix = replaceOnce(
+  basePrefix,
+  '<nav style="display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap">',
+  '<nav data-site-nav style="display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap">',
+  'hamburger: tag desktop nav'
+);
+{
+  const emailCta =
+    '<a href="mailto:meaghan@eastvanslp.ca?subject=Speech%20therapy%20enquiry" style="background: ' +
+    '#3F5A32; color: #F7F9F2; padding: 12px 20px; border-radius: 999px; font-size: 14.5px; ' +
+    'font-weight: 600; letter-spacing: .01em" style-hover="background: #2C3A24; color: #FFFFFF; ' +
+    'text-decoration: none">Email Meaghan</a>';
+  assertOnce(basePrefix, emailCta, 'hamburger: header Email Meaghan CTA');
+  const hamburgerButton =
+    '<button data-menu-toggle sc-camel-on-click="{{ toggleMenu }}" aria-label="Menu" style="display: ' +
+    'none; align-items: center; justify-content: center; width: 40px; height: 40px; margin-left: ' +
+    'auto; background: none; border: 1px solid #DCE4CE; border-radius: 10px; cursor: pointer; ' +
+    'padding: 0">\n' +
+    '<sc-if value="{{ menuClosed }}" hint-placeholder-val="{{ true }}">\n' +
+    '<span style="display: grid; gap: 5px">\n' +
+    '<span style="display: block; width: 18px; height: 2px; border-radius: 2px; background: #3D4A31"></span>\n' +
+    '<span style="display: block; width: 18px; height: 2px; border-radius: 2px; background: #3D4A31"></span>\n' +
+    '<span style="display: block; width: 18px; height: 2px; border-radius: 2px; background: #3D4A31"></span>\n' +
+    '</span>\n' +
+    '</sc-if>\n' +
+    '<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">\n' +
+    '<span style="position: relative; width: 18px; height: 18px; display: block">\n' +
+    '<span style="position: absolute; top: 8px; left: 0; width: 18px; height: 2px; border-radius: 2px; background: #3D4A31; transform: rotate(45deg)"></span>\n' +
+    '<span style="position: absolute; top: 8px; left: 0; width: 18px; height: 2px; border-radius: 2px; background: #3D4A31; transform: rotate(-45deg)"></span>\n' +
+    '</span>\n' +
+    '</sc-if>\n' +
+    '</button>';
+  const mobileMenuPanel =
+    '<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">\n' +
+    '<div data-mobile-menu style="border-top: 1px solid #E7E2D6">\n' +
+    '<div style="max-width: 1180px; margin: 0 auto; padding: 4px 32px 20px; display: flex; flex-direction: column">\n' +
+    '<sc-for list="{{ nav }}" as="item" hint-placeholder-count="5">\n' +
+    '<a href="{{ item.href }}" style="padding: 14px 4px; font-size: 16.5px; font-weight: 500; color: #3D4A31; text-decoration: none; border-bottom: 1px solid #EDF1E5">{{ item.label }}</a>\n' +
+    '</sc-for>\n' +
+    emailCta.replace('padding: 12px 20px', 'margin-top: 16px; text-align: center; padding: 14px 20px') +
+    '\n</div>\n</div>\n</sc-if>';
+  const emailCtaTaggedForHeader = emailCta.replace('<a href="mailto:', '<a data-email-cta href="mailto:');
+  basePrefix = replaceOnce(
+    basePrefix,
+    emailCta + '\n</div>\n</header>',
+    emailCtaTaggedForHeader + '\n' + hamburgerButton + '\n</div>\n' + mobileMenuPanel + '\n</header>',
+    'hamburger: insert toggle button + mobile menu panel'
+  );
+}
+basePrefix = replaceOnce(
+  basePrefix,
+  '@media (max-width: 920px) { [data-stack] { grid-template-columns: 1fr !important; gap: 44px !important; } [data-cols] { grid-template-columns: repeat(2, 1fr) !important; } [data-span="2"] { grid-column: span 1 !important; } }',
+  '@media (max-width: 920px) { [data-stack] { grid-template-columns: 1fr !important; gap: 44px !important; } [data-cols] { grid-template-columns: repeat(2, 1fr) !important; } [data-span="2"] { grid-column: span 1 !important; } [data-site-nav] { display: none !important; } header [data-email-cta] { display: none !important; } [data-menu-toggle] { display: flex !important; } }\n@media (min-width: 921px) { [data-mobile-menu] { display: none !important; } }',
+  'hamburger: breakpoint CSS (reuses the existing 920px block — already covers iPad Air)'
+);
+
 // ---------- 3. per-page assembly: state.page + meta, then encode + write ----------
 const applied = [];
 
@@ -331,10 +414,12 @@ for (const page of PAGES) {
   );
 
   // state.page must match this file's own (and only) block, or its <sc-if> renders nothing.
+  // (Search string includes menuOpen: false because the hamburger-menu transform above
+  // already added it to baseSuffix by this point — it must match what's actually there now.)
   suffix = replaceOnce(
     suffix,
-    "state = { page: 'home', openService: 0, openFaq: -1 };",
-    `state = { page: '${page}', openService: 0, openFaq: -1 };`,
+    "state = { page: 'home', openService: 0, openFaq: -1, menuOpen: false };",
+    `state = { page: '${page}', openService: 0, openFaq: -1, menuOpen: false };`,
     `${page}: initial state.page`
   );
 
