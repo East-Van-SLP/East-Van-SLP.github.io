@@ -95,6 +95,23 @@ online slots after 4:00 pm · **$160/hr** for sessions (public since V4) · repo
 licensed with the College of Health and Care Professionals of BC, member of Speech and Hearing BC
 and Speech-Language & Audiology Canada · meaghan@eastvanslp.ca · 778-230-3899.
 
+## Worked on from two machines
+
+Miguel edits this repo from both a Windows PC (primary) and a MacBook (on the road). There's no
+shared local state between them — **git is the only handoff mechanism**. Practical implications:
+
+- Start a session with `git status` / `git pull` before assuming the working tree matches what a
+  prior session left. Uncommitted changes from the other machine won't be there; uncommitted
+  changes made *here* won't show up there until pushed.
+- Commit and push at natural stopping points, not just at the very end of a task, so the other
+  device can pick up mid-stream rather than only after a fully finished piece of work.
+- Never hardcode an OS-specific absolute path (e.g. this repo's Windows Google Drive path) into a
+  script or doc — the Mac's path is different. Scripts in `.claude/` should only ever reference
+  paths relative to the repo root.
+- The `python`/`python3`/`node` split described below under Local preview is the canonical example
+  of a cross-machine gotcha in this repo — the same care applies to anything else that might be
+  spelled differently between macOS and Windows (line endings, case-sensitive paths, etc.).
+
 ## Local preview
 
 ```bash
