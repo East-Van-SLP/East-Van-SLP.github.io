@@ -18,3 +18,12 @@ East Van SLP -  HTML Source/
 # ...except the Open Graph card and the Apple touch icon, which Pages must serve as real files.
 !og-image.jpg
 !apple-touch-icon.png
+
+# Google Search Console verification as downloaded. The copy that actually gets
+# served lives at the repo root and IS tracked — Google re-checks it, so removing
+# it would un-verify the property.
+Search Console Verification/
+
+# Stray canvas exports dropped in the repo root; the working copies belong in the
+# source folder above.
+Meaghan McLeod*.html
