@@ -1,0 +1,19 @@
+# Normalise line endings.
+#
+# This repo is worked on from a Windows PC and a MacBook, and it lives inside a
+# synced Drive folder — so the working tree itself gets copied between the two
+# machines outside of git. Windows git checks out CRLF by default; the Mac then
+# sees a carriage return on every line and reports all five pages plus the scripts
+# as modified, producing a diff of thousands of lines that contains no real change.
+#
+# eol=lf overrides core.autocrlf, so both machines keep an LF working tree and the
+# phantom diff cannot come back.
+* text=auto eol=lf
+
+# Binary assets — never touch these.
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.ico  binary
+*.zip  binary
+*.docx binary
